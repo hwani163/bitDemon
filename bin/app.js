@@ -33,8 +33,8 @@ function run(){
 
               mysql.createConnection({
                   host: 'localhost',
-                  user: 'APP',
-                  password: 'qwer1234',
+                  user: 'root',
+                  password: '',
                   database: 'bit'
                 }).then(conn => {
                   var qeryresult = conn.query(query);
