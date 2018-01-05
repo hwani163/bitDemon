@@ -1,0 +1,19 @@
+{
+  "name": "demons",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/app.js"
+  },
+  "dependencies": {
+    "async-request": "^1.2.0",
+    "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.3",
+    "forever": "^0.15.3",
+    "moment": "^2.18.1",
+    "node-cron": "*",
+    "request": "^2.81.0",
+    "promise-mysql": "*"
+    ,"bithumb.js":"*"
+  }
+}
