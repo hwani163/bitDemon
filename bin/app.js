@@ -2,39 +2,43 @@
  * Created by Seokhwan on 2017. 6. 24..
  */
  const Bithumb = require('bithumb.js')
- const bithumb = new Bithumb('807feeccd34ab75e26776950a361dc15', '8d88a14baf30bbd98a023fc9b29b98d6');
+ const cron = require('node-cron');
+ const mysql = require('promise-mysql');
+ const coins = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP', 'BCH', 'XMR', 'ZEC', 'QTUM', 'BTG', 'EOS'];
+ let math = require('./mathModule.js');
+ let common = require('./common.js');
+ let secretKey=null;
+ let generalKey=null;
 
 
-// let dbtools = require('./dbtools.js');
-let math = require('./mathModule.js');
-let moment = require('moment');
-
-const cron = require('node-cron');
-const mysql = require('promise-mysql');
-const coins = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP', 'BCH', 'XMR', 'ZEC', 'QTUM', 'BTG', 'EOS'];
 
 
-cron.schedule('*/2 * * * * *', function(){
-  console.log('작업 실행');
-  run();
-});
+const bithumb = new Bithumb(common.getGenlCd('SECRET_KEY'), common.getGenlCd('GENERAL_KEY'));
+
+
+
+// while (true) {
+
+  setInterval(function(){
+    run();
+  },1000);
+// };
+
 
 
 function run(){
 
-
-
           (async function () {
             for (var i in coins) {
             const ticker = await bithumb.getTicker(coins[i]);
-            console.log(ticker);
             let avg = ticker.data.sell_price;
-              let query = "INSERT INTO "+coins[i]+"_PRICE VALUES(now(),'"+avg+"')";
+            let date = ticker.data.date;
+            let query = "INSERT INTO "+coins[i]+"_PRICE VALUES("+date+",'"+avg+"')";
 
               mysql.createConnection({
-                  host: 'localhost',
-                  user: 'root',
-                  password: '',
+                  host: '127.0.0.1',
+                  user: 'APP',
+                  password: 'qwer1234',
                   database: 'bit'
                 }).then(conn => {
                   var qeryresult = conn.query(query);
@@ -47,14 +51,6 @@ function run(){
               }
 
             }());
-
-
-
-
-
-
-
-
 
 
 
