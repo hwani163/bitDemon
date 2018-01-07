@@ -38,3 +38,4 @@ Thumbs.db
 
 # nodeModules #
 node_modules/
+db/
