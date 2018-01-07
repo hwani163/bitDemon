@@ -13,5 +13,6 @@
     ,"mysql2": "*"
     ,"bluebird":"*"
     ,"bithumb.js":"*"
+    ,"moment":"^2.20.1"
   }
 }

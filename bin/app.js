@@ -1,6 +1,6 @@
 (async function () {
  const Bithumb = require('bithumb.js')
- const coins = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP', 'BCH', 'XMR', 'ZEC', 'QTUM', 'BTG', 'EOS'];
+ const moment = require('moment');
  const math = require('./mathModule.js');
  const common = require('./common.js');
  const DbConnector = require('./dbConnector');
@@ -8,6 +8,8 @@
  const connect_Key = await common.getGenlCd("CONNECT_KEY");
  const secret_Key = await common.getGenlCd("SECRET_KEY");
  const bithumb = new Bithumb(connect_Key,secret_Key);
+ const coins = await common.getCoinList();
+
 
 
 
@@ -23,20 +25,29 @@
       if(ticker.status=='0000'){
         console.log(ticker.status);
         let param = new Array();
-        param.push(['BTC_price',ticker.data.BTC.sell_price,ticker.data.date]);
-        param.push(['ETH_price',ticker.data.ETH.sell_price,ticker.data.date]);
-        param.push(['DASH_price',ticker.data.DASH.sell_price,ticker.data.date]);
-        param.push(['LTC_price',ticker.data.LTC.sell_price,ticker.data.date]);
-        param.push(['ETC_price',ticker.data.ETC.sell_price,ticker.data.date]);
-        param.push(['XRP_price',ticker.data.XRP.sell_price,ticker.data.date]);
-        param.push(['BCH_price',ticker.data.BCH.sell_price,ticker.data.date]);
-        param.push(['XMR_price',ticker.data.XMR.sell_price,ticker.data.date]);
-        param.push(['ZEC_price',ticker.data.ZEC.sell_price,ticker.data.date]);
-        param.push(['QTUM_price',ticker.data.QTUM.sell_price,ticker.data.date]);
-        param.push(['BTG_price',ticker.data.BTG.sell_price,ticker.data.date]);
-        param.push(['EOS_price',ticker.data.EOS.sell_price,ticker.data.date]);
+        let unixDate=ticker.data.date;
+        let yyyy=moment(parseInt(unixDate)).format('YYYY');
+        let mm=moment(parseInt(unixDate)).format('MM');
+        let dd=moment(parseInt(unixDate)).format('DD');
+        let hh=moment(parseInt(unixDate)).format('hh');
+        let min=moment(parseInt(unixDate)).format('mm');
+
+        param.push({'table':'BTC_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.BTC.sell_price});
+        param.push({'table':'ETH_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.ETH.sell_price});
+        param.push({'table':'DASH_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.DASH.sell_price});
+        param.push({'table':'LTC_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.LTC.sell_price});
+        param.push({'table':'ETC_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.ETC.sell_price});
+        param.push({'table':'XRP_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.XRP.sell_price});
+        param.push({'table':'BCH_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.BCH.sell_price});
+        param.push({'table':'XMR_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.XMR.sell_price});
+        param.push({'table':'ZEC_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.ZEC.sell_price});
+        param.push({'table':'QTUM_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.QTUM.sell_price});
+        param.push({'table':'BTG_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.BTG.sell_price});
+        param.push({'table':'EOS_price','dt':unixDate,'year':yyyy,'mm':mm,'dd':dd,'hh':hh,'min':min,'price':ticker.data.EOS.sell_price});
+
         for (var i in param) {
-          const result = await db.selectQuery("INSERT INTO "+param[i][0]+" VALUES("+[param[i][2]+","+param[i][1]]+")");
+          sql = "INSERT INTO "+param[i].table+" VALUES("+param[i].dt+",'"+param[i].year+"','"+param[i].mm+"','"+param[i].dd+"','"+param[i].hh+"','"+param[i].min+"','"+param[i].price+"')";
+          const result = await db.selectQuery(sql);
         }
 
       }else{
