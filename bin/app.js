@@ -1,57 +1,62 @@
-/**
- * Created by Seokhwan on 2017. 6. 24..
- */
+(async function () {
  const Bithumb = require('bithumb.js')
- const cron = require('node-cron');
- const mysql = require('promise-mysql');
  const coins = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP', 'BCH', 'XMR', 'ZEC', 'QTUM', 'BTG', 'EOS'];
- let math = require('./mathModule.js');
- let common = require('./common.js');
- let secretKey=null;
- let generalKey=null;
+ const math = require('./mathModule.js');
+ const common = require('./common.js');
+ const DbConnector = require('./dbConnector');
+ const db = new DbConnector();
+ const connect_Key = await common.getGenlCd("CONNECT_KEY");
+ const secret_Key = await common.getGenlCd("SECRET_KEY");
+ const bithumb = new Bithumb(connect_Key,secret_Key);
 
 
 
 
-const bithumb = new Bithumb(common.getGenlCd('SECRET_KEY'), common.getGenlCd('GENERAL_KEY'));
 
 
 
-// while (true) {
 
   setInterval(function(){
-    run();
+    (async function () {
+      console.log("letsgo");
+      const ticker = await bithumb.getTicker("ALL");
+      if(ticker.status=='0000'){
+        console.log(ticker.status);
+        let param = new Array();
+        param.push(['BTC_price',ticker.data.BTC.sell_price,ticker.data.date]);
+        param.push(['ETH_price',ticker.data.ETH.sell_price,ticker.data.date]);
+        param.push(['DASH_price',ticker.data.DASH.sell_price,ticker.data.date]);
+        param.push(['LTC_price',ticker.data.LTC.sell_price,ticker.data.date]);
+        param.push(['ETC_price',ticker.data.ETC.sell_price,ticker.data.date]);
+        param.push(['XRP_price',ticker.data.XRP.sell_price,ticker.data.date]);
+        param.push(['BCH_price',ticker.data.BCH.sell_price,ticker.data.date]);
+        param.push(['XMR_price',ticker.data.XMR.sell_price,ticker.data.date]);
+        param.push(['ZEC_price',ticker.data.ZEC.sell_price,ticker.data.date]);
+        param.push(['QTUM_price',ticker.data.QTUM.sell_price,ticker.data.date]);
+        param.push(['BTG_price',ticker.data.BTG.sell_price,ticker.data.date]);
+        param.push(['EOS_price',ticker.data.EOS.sell_price,ticker.data.date]);
+        for (var i in param) {
+          const result = await db.selectQuery("INSERT INTO "+param[i][0]+" VALUES("+[param[i][2]+","+param[i][1]]+")");
+        }
+
+      }else{
+        console.log("API Error"+ticker.status);
+      }
+
+        }());
   },1000);
-// };
+
 
 
 
 function run(){
 
-          (async function () {
-            for (var i in coins) {
-            const ticker = await bithumb.getTicker(coins[i]);
-            let avg = ticker.data.sell_price;
-            let date = ticker.data.date;
-            let query = "INSERT INTO "+coins[i]+"_PRICE VALUES("+date+",'"+avg+"')";
 
-              mysql.createConnection({
-                  host: '127.0.0.1',
-                  user: 'APP',
-                  password: 'qwer1234',
-                  database: 'bit'
-                }).then(conn => {
-                  var qeryresult = conn.query(query);
-                  conn.end();
-                  return qeryresult;
-                }).then(rows => {
-                  // Logs out a list of hobbits
-                  console.log(coins[i]+rows.affectedRows+'건 인서트 완료');
-                });
-              }
 
-            }());
+
+
 
 
 
   }
+  }());
